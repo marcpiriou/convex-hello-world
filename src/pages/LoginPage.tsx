@@ -34,6 +34,7 @@ export function LoginPage({ portal }: { portal: Portal }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [adminInviteCode, setAdminInviteCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,15 +57,25 @@ export function LoginPage({ portal }: { portal: Portal }) {
         email: email.trim(),
         password,
         flow,
-        ...(flow === "signUp" ? { name: name.trim(), role: portal } : {}),
+        ...(flow === "signUp"
+          ? {
+              name: name.trim(),
+              role: portal,
+              ...(portal === "admin" ? { adminInviteCode: adminInviteCode.trim() } : {}),
+            }
+          : {}),
       });
       // Navigation happens in the effect above once the viewer query resolves.
-    } catch {
-      setError(
-        flow === "signUp"
-          ? "Impossible de créer le compte. Vérifiez vos informations (mot de passe : 8 caractères minimum) ou l'email est peut-être déjà utilisé."
-          : "Email ou mot de passe incorrect.",
-      );
+    } catch (err) {
+      if (flow === "signUp" && portal === "admin" && /invitation/i.test((err as Error)?.message ?? "")) {
+        setError("Code d'invitation administrateur invalide.");
+      } else {
+        setError(
+          flow === "signUp"
+            ? "Impossible de créer le compte. Vérifiez vos informations (mot de passe : 8 caractères minimum) ou l'email est peut-être déjà utilisé."
+            : "Email ou mot de passe incorrect.",
+        );
+      }
     } finally {
       setSubmitting(false);
     }
@@ -142,6 +153,26 @@ export function LoginPage({ portal }: { portal: Portal }) {
                   placeholder="vous@exemple.com"
                 />
               </div>
+
+              {flow === "signUp" && portal === "admin" && (
+                <div>
+                  <label
+                    htmlFor="adminInviteCode"
+                    className="block text-sm font-medium text-slate-700"
+                  >
+                    Code d'invitation administrateur
+                  </label>
+                  <input
+                    id="adminInviteCode"
+                    type="text"
+                    required
+                    value={adminInviteCode}
+                    onChange={(e) => setAdminInviteCode(e.target.value)}
+                    className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+                    placeholder="Fourni par votre organisation"
+                  />
+                </div>
+              )}
 
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-slate-700">

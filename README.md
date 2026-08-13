@@ -19,13 +19,12 @@ React, Vite, Tailwind CSS et [Convex Auth](https://labs.convex.dev/auth).
     `Password`), mais l'inscription pose un rôle différent (`user` ou
     `admin`) sur le compte créé (voir `convex/auth.ts`). Après connexion,
     chacun est redirigé vers son espace selon son rôle.
+  - L'inscription sur `/admin/login` exige un **code d'invitation**
+    (variable d'environnement Convex `ADMIN_INVITE_CODE`) pour éviter que
+    n'importe qui puisse s'auto-promouvoir administrateur — voir
+    "Configurer Convex" ci-dessous.
 - Page de connexion avec illustration générique (SVG + fonds flous en CSS,
   aucune image externe requise) — `src/components/HeroIllustration.tsx`.
-
-> ⚠️ Pour simplifier ce projet de démonstration, s'inscrire depuis
-> `/admin/login` donne directement le rôle `admin`. Dans une vraie
-> application, restreignez la création de comptes administrateurs
-> (invitation, validation manuelle, promotion depuis le dashboard Convex...).
 
 ## Configurer Convex
 
@@ -72,7 +71,18 @@ local :
    [documentation Convex Auth](https://labs.convex.dev/auth/setup) pour le
    détail.
 
-4. **Lancer le frontend** (dans un autre terminal, ou via la commande
+4. **Définir le code d'invitation administrateur** (nécessaire pour créer un
+   compte via `/admin/login`) :
+
+   ```bash
+   npx convex env set ADMIN_INVITE_CODE "choisissez-un-code-secret"
+   ```
+
+   Sans cette variable, l'inscription admin est refusée (ce qui est le
+   comportement par défaut si vous ne la définissez pas — plus sûr que de
+   l'ouvrir à tout le monde).
+
+5. **Lancer le frontend** (dans un autre terminal, ou via la commande
    combinée ci-dessous) :
 
    ```bash
@@ -85,9 +95,10 @@ local :
    npm run dev
    ```
 
-5. Ouvrez `http://localhost:5173/login` pour l'espace utilisateurs, ou
-   `http://localhost:5173/admin/login` pour le back office. Créez un compte
-   depuis chacun pour tester les deux rôles.
+6. Ouvrez `http://localhost:5173/login` pour l'espace utilisateurs, ou
+   `http://localhost:5173/admin/login` pour le back office (avec le code
+   d'invitation défini à l'étape 4). Créez un compte depuis chacun pour
+   tester les deux rôles.
 
 ## Scripts
 
